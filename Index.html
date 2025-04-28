@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Financial Literacy Platform</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .header {
+      background: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.8rem;
+    }
+    .main-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      background: #ffffff;
+      padding: 1rem;
+      flex-wrap: wrap;
+    }
+    .main-buttons button {
+      background: #007BFF;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      background: #f9f9f9;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      margin: 1rem 0;
+      color: #333;
+    }
+    .sub-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    .sub-buttons button {
+      padding: 10px 20px;
+      background: #17a2b8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 80%;
+    }
+    .bot {
+      background: #d4edda;
+      align-self: flex-start;
+    }
+    .user {
+      background: #cce5ff;
+      align-self: flex-end;
+      text-align: right;
+    }
+    .quiz-options button {
+      margin-top: 8px;
+      background: #eee;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      width: 100%;
+    }
+    .chart-container {
+      margin-top: 20px;
+      width: 300px;
+      height: 300px;
+    }
+    canvas {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">Financial Literacy Learning Platform</div>
+
+<div class="main-buttons">
+  <button onclick="showLearn()">📚 Learn & Quiz</button>
+  <button onclick="showTools()">🛠 Financial Tools</button>
+</div>
+
+<div class="content" id="contentArea">
+  <!-- Dynamic content will load here -->
+</div>
+<script>
+    const beginnerTopics = {
+      "Budgeting": {
+        lesson: "Budgeting helps you plan how to spend and save money wisely. It reduces financial stress and helps you reach goals.",
+        questions: [
+          { q: "What is the main goal of budgeting?", options: ["Spend more", "Plan spending", "Increase taxes", "Shop impulsively"], answer: "Plan spending" },
+          { q: "What should you prioritize in a budget?", options: ["Luxury", "Needs first", "Debt increase", "Random items"], answer: "Needs first" },
+          { q: "What happens if you overspend?", options: ["Savings grow", "Debt grows", "Free cash", "Better budgeting"], answer: "Debt grows" },
+          { q: "Emergency funds are part of?", options: ["Vacation", "Budget", "Entertainment", "Investments"], answer: "Budget" },
+          { q: "Good budgeting helps you?", options: ["Lose money", "Save money", "Get loans", "Spend freely"], answer: "Save money" }
+        ]
+      },
+      "Saving": {
+        lesson: "Saving means setting aside income for emergencies, goals like buying a house, and future retirement.",
+        questions: [
+          { q: "Why is saving important?", options: ["For emergencies", "To spend more", "To gamble", "To avoid taxes"], answer: "For emergencies" },
+          { q: "Where do people usually save money?", options: ["Wallet", "Bank account", "Under mattress", "In stocks"], answer: "Bank account" },
+          { q: "Savings help reduce?", options: ["Freedom", "Stress", "Income", "Taxes"], answer: "Stress" },
+          { q: "Saving early benefits?", options: ["Fewer returns", "More growth", "Higher taxes", "Debt"], answer: "More growth" },
+          { q: "Emergency savings cover?", options: ["Vacations", "Fun", "Unexpected costs", "Luxury shopping"], answer: "Unexpected costs" }
+        ]
+      },
+      "Investing": {
+        lesson: "Investing grows your money over time through stocks, bonds, and real estate. It carries risk but offers rewards.",
+        questions: [
+          { q: "Which is an investment?", options: ["Food", "Stocks", "Clothes", "Tickets"], answer: "Stocks" },
+          { q: "Why invest money?", options: ["Grow wealth", "Lose savings", "Spend faster", "Pay taxes"], answer: "Grow wealth" },
+          { q: "Stocks represent ownership of?", options: ["Debt", "Companies", "Banks", "Houses"], answer: "Companies" },
+          { q: "Bonds are loans to?", options: ["Businesses/Governments", "Friends", "Stores", "Relatives"], answer: "Businesses/Governments" },
+          { q: "Real estate investing means buying?", options: ["Shoes", "Houses", "Clothes", "Watches"], answer: "Houses" }
+        ]
+      },
+      "Credit & Loans": {
+        lesson: "Credit allows you to borrow money now and repay later. Loans are structured borrowing with interest.",
+        questions: [
+          { q: "Misusing credit leads to?", options: ["Higher savings", "Debt problems", "Lower taxes", "More income"], answer: "Debt problems" },
+          { q: "A loan must be?", options: ["Avoided", "Paid back", "Used for fun", "Given freely"], answer: "Paid back" },
+          { q: "Good credit score helps?", options: ["Higher interest", "Loan approvals", "Debt", "Fees"], answer: "Loan approvals" },
+          { q: "High interest rates mean?", options: ["Lower payments", "Higher payments", "Free loans", "Free shopping"], answer: "Higher payments" },
+          { q: "Defaulting on a loan damages?", options: ["Credit score", "Happiness", "Car value", "Grocery bills"], answer: "Credit score" }
+        ]
+      },
+      "Taxes": {
+        lesson: "Taxes fund public services like roads, schools, and safety. Everyone contributes through income, property, and sales taxes.",
+        questions: [
+          { q: "Taxes fund?", options: ["Parks and roads", "Vacation", "Concerts", "Fast food"], answer: "Parks and roads" },
+          { q: "Income tax is paid on?", options: ["Spending", "Earnings", "Saving", "Investing"], answer: "Earnings" },
+          { q: "Not paying taxes leads to?", options: ["Lottery wins", "Penalties and jail", "Savings", "Gifts"], answer: "Penalties and jail" },
+          { q: "Sales tax happens when?", options: ["Selling stocks", "Buying items", "Saving money", "Taking loans"], answer: "Buying items" },
+          { q: "Property tax is tied to?", options: ["Home ownership", "Car insurance", "Job salary", "Concerts"], answer: "Home ownership" }
+        ]
+      },
+      "Insurance": {
+        lesson: "Insurance protects you financially against accidents, health issues, or disasters. You pay premiums for protection.",
+        questions: [
+          { q: "Insurance provides?", options: ["Free gifts", "Financial protection", "More debt", "Loans"], answer: "Financial protection" },
+          { q: "Car insurance covers?", options: ["Car damage", "Airplane tickets", "Groceries", "Tuition"], answer: "Car damage" },
+          { q: "Life insurance pays when?", options: ["Accidents", "Home repairs", "Passing away", "Shopping"], answer: "Passing away" },
+          { q: "Health insurance covers?", options: ["Hospital bills", "Fashion", "Movies", "Gadgets"], answer: "Hospital bills" },
+          { q: "Insurance cost is called?", options: ["Dividend", "Premium", "Credit", "Loan"], answer: "Premium" }
+        ]
+      }
+    };
+    
+    const advancedTopics = {
+      "Stocks vs Bonds": {
+        lesson: "Stocks give ownership in a company; bonds are loans to a company or government. Stocks tend to have higher risk and returns compared to bonds.",
+        questions: [
+          { q: "Stocks represent?", options: ["Debt", "Ownership", "Insurance", "Savings"], answer: "Ownership" },
+          { q: "Bonds are a form of?", options: ["Donation", "Loan", "Stock", "Gift"], answer: "Loan" },
+          { q: "Stocks generally offer?", options: ["Guaranteed returns", "Higher risk and reward", "Debt reduction", "Free insurance"], answer: "Higher risk and reward" },
+          { q: "Bonds are considered?", options: ["High-risk", "Stable income", "Equity", "Lottery"], answer: "Stable income" },
+          { q: "Which has less risk typically?", options: ["Stocks", "Bonds", "Options", "Futures"], answer: "Bonds" }
+        ]
+      },
+      "Compound Interest": {
+        lesson: "Compound interest means earning interest on both your initial principal and on the accumulated interest. It causes your savings to grow faster.",
+        questions: [
+          { q: "Compound interest is?", options: ["Simple interest", "Interest on interest", "Gambling", "Stock loss"], answer: "Interest on interest" },
+          { q: "Compound interest benefits?", options: ["Borrowers", "Investors", "Shoppers", "Gamblers"], answer: "Investors" },
+          { q: "Which grows faster?", options: ["Simple interest", "Compound interest", "No interest", "Flat saving"], answer: "Compound interest" },
+          { q: "Longer time with compound interest means?", options: ["Less growth", "More growth", "No effect", "Debt"], answer: "More growth" },
+          { q: "Daily compounding means?", options: ["Compounds once a year", "Compounds daily", "No compounding", "Weekly charges"], answer: "Compounds daily" }
+        ]
+      },
+      "Retirement Planning": {
+        lesson: "Planning for retirement involves saving and investing during your working years to afford living expenses when you stop working.",
+        questions: [
+          { q: "401(k) plans help with?", options: ["Travel", "Home buying", "Retirement saving", "Taxes"], answer: "Retirement saving" },
+          { q: "Roth IRA contributions are?", options: ["Pre-tax", "After-tax", "Gifted", "Loaned"], answer: "After-tax" },
+          { q: "Retirement planning prevents?", options: ["Homelessness", "Fun", "Early debt", "Lottery winnings"], answer: "Homelessness" },
+          { q: "Best time to start retirement saving?", options: ["Later", "As early as possible", "After 50", "Never"], answer: "As early as possible" },
+          { q: "Pension plans pay during?", options: ["Early life", "Retirement", "Shopping", "Loan payoffs"], answer: "Retirement" }
+        ]
+      },
+      "Inflation": {
+        lesson: "Inflation is the rise in the price of goods and services over time, reducing purchasing power.",
+        questions: [
+          { q: "Inflation means prices?", options: ["Stay same", "Go up", "Go down", "Disappear"], answer: "Go up" },
+          { q: "Inflation reduces?", options: ["Purchasing power", "Savings growth", "Debt", "Spending"], answer: "Purchasing power" },
+          { q: "Moderate inflation is?", options: ["Normal", "Dangerous", "Rare", "Illegal"], answer: "Normal" },
+          { q: "High inflation causes?", options: ["Stable economy", "Economic problems", "Lower prices", "Free goods"], answer: "Economic problems" },
+          { q: "Inflation target for most governments is?", options: ["0%", "2%", "10%", "20%"], answer: "2%" }
+        ]
+      },
+      "Emergency Funds": {
+        lesson: "Emergency funds are savings for unexpected situations like job loss or major repairs. Aim for 3-6 months of expenses.",
+        questions: [
+          { q: "Emergency funds cover?", options: ["Shopping", "Vacations", "Unexpected costs", "Wants"], answer: "Unexpected costs" },
+          { q: "Emergency fund goal?", options: ["1 week", "3-6 months", "1 year", "Lifetime"], answer: "3-6 months" },
+          { q: "Use emergency funds for?", options: ["New clothes", "Car repairs", "Dining out", "Concerts"], answer: "Car repairs" },
+          { q: "Emergency savings help?", options: ["Increase debt", "Lower stress", "Buy gadgets", "Travel"], answer: "Lower stress" },
+          { q: "Best place for emergency fund?", options: ["Stocks", "Savings account", "Crypto", "Wallet"], answer: "Savings account" }
+        ]
+      }
+    };
+    </script>
+<script>
+    // Loan Calculator
+    function loadLoanCalculator() {
+      document.getElementById('contentArea').innerHTML = `
+        <div class="section-title">💵 Loan Calculator</div>
+        <input type="number" id="loanAmount" placeholder="Loan Amount ($)" /><br><br>
+        <input type="number" id="loanYears" placeholder="Loan Term (Years)" /><br><br>
+        <input type="number" id="loanRate" placeholder="Interest Rate (%)" /><br><br>
+        <button onclick="calculateLoan()">Calculate Payment</button>
+        <div id="loanResult"></div>
+      `;
+    }
+    
+    function calculateLoan() {
+      const P = parseFloat(document.getElementById('loanAmount').value);
+      const years = parseFloat(document.getElementById('loanYears').value);
+      const r = parseFloat(document.getElementById('loanRate').value) / 100 / 12;
+      const n = years * 12;
+      const payment = (P * r) / (1 - Math.pow(1 + r, -n));
+      document.getElementById('loanResult').innerHTML = `<br>Monthly Payment: $${payment.toFixed(2)}`;
+    }
+    
+    // Tax Calculator
+    function loadTaxCalculator() {
+      document.getElementById('contentArea').innerHTML = `
+        <div class="section-title">🧾 Tax Estimator</div>
+        <input type="number" id="income" placeholder="Annual Income ($)" /><br><br>
+        <button onclick="calculateTax()">Estimate Tax</button>
+        <div id="taxResult"></div>
+      `;
+    }
+    
+    function calculateTax() {
+      const income = parseFloat(document.getElementById('income').value);
+      let tax = 0;
+      if (income <= 10000) tax = income * 0.1;
+      else if (income <= 40000) tax = 1000 + (income - 10000) * 0.12;
+      else if (income <= 85000) tax = 4600 + (income - 40000) * 0.22;
+      else tax = 14500 + (income - 85000) * 0.24;
+      document.getElementById('taxResult').innerHTML = `<br>Estimated Tax Owed: $${tax.toFixed(2)}`;
+    }
+    
+    // Investment Simulator
+    function loadInvestmentSimulator() {
+      document.getElementById('contentArea').innerHTML = `
+        <div class="section-title">📈 Investment Growth Simulator</div>
+        <input type="number" id="initialAmount" placeholder="Initial Investment ($)" /><br><br>
+        <input type="number" id="annualContribution" placeholder="Annual Contribution ($)" /><br><br>
+        <input type="number" id="years" placeholder="Investment Duration (Years)" /><br><br>
+        <input type="number" id="rateOfReturn" placeholder="Expected Annual Return (%)" /><br><br>
+        <button onclick="simulateInvestment()">Simulate</button>
+        <div class="chart-container"><canvas id="investmentChart"></canvas></div>
+      `;
+    }
+    
+    // Insurance Planner
+    function loadInsurancePlanner() {
+      document.getElementById('contentArea').innerHTML = `
+        <div class="section-title">📜 Insurance Planning</div>
+        <p>Insurance helps you cover large unexpected costs. Choosing the right insurance involves balancing cost vs. protection:</p>
+        <ul>
+          <li><strong>Term Life Insurance</strong> - cheaper, limited years, big payout</li>
+          <li><strong>Whole Life Insurance</strong> - lifelong, more expensive, cash value</li>
+          <li><strong>Health Insurance</strong> - covers medical expenses</li>
+          <li><strong>Auto Insurance</strong> - covers vehicle accidents</li>
+        </ul><br>
+        <input type="number" id="monthlyPremium" placeholder="Monthly Premium ($)" /><br><br>
+        <input type="number" id="payoutAmount" placeholder="Insurance Payout ($)" /><br><br>
+        <button onclick="analyzeInsurance()">Analyze Cost/Benefit</button>
+        <div id="insuranceResult"></div>
+      `;
+    }
+    
+    function analyzeInsurance() {
+      const premium = parseFloat(document.getElementById('monthlyPremium').value) * 12;
+      const payout = parseFloat(document.getElementById('payoutAmount').value);
+      const ratio = (premium / payout) * 100;
+      let result = "";
+      if (ratio < 5) result = "Good value insurance.";
+      else if (ratio < 15) result = "Reasonable insurance.";
+      else result = "Expensive insurance relative to payout.";
+      document.getElementById('insuranceResult').innerHTML = `<br>${result}`;
+    }
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let currentTopicType = "";
+let currentTopicName = "";
+let currentQuestionIndex = 0;
+let currentScore = 0;
+
+function showLearn() {
+  document.getElementById('contentArea').innerHTML = `
+    <div class="section-title">Choose a Topic (Beginner)</div>
+    <div class="sub-buttons">
+      ${Object.keys(beginnerTopics).map(topic => `<button onclick="startTopic('beginner', '${topic}')">${topic}</button>`).join('')}
+    </div>
+    <div class="section-title">Choose a Topic (Advanced)</div>
+    <div class="sub-buttons">
+      ${Object.keys(advancedTopics).map(topic => `<button onclick="startTopic('advanced', '${topic}')">${topic}</button>`).join('')}
+    </div>
+  `;
+}
+
+function showTools() {
+  document.getElementById('contentArea').innerHTML = `
+    <div class="section-title">🛠 Financial Tools</div>
+    <div class="sub-buttons">
+      <button onclick="loadLoanCalculator()">Loan Calculator</button>
+      <button onclick="loadTaxCalculator()">Tax Estimator</button>
+      <button onclick="loadInvestmentSimulator()">Investment Simulator</button>
+      <button onclick="loadInsurancePlanner()">Insurance Planning</button>
+    </div>
+  `;
+}
+
+function startTopic(type, topic) {
+  currentTopicType = type;
+  currentTopicName = topic;
+  currentQuestionIndex = 0;
+  currentScore = 0;
+  
+  const topicData = type === 'beginner' ? beginnerTopics[topic] : advancedTopics[topic];
+  document.getElementById('contentArea').innerHTML = `
+    <div class="section-title">📚 ${topic}</div>
+    <p>${topicData.lesson}</p>
+    <br><button onclick="nextQuestion()">Start Quiz</button>
+  `;
+}
+
+function nextQuestion() {
+  const topicData = currentTopicType === 'beginner' ? beginnerTopics[currentTopicName] : advancedTopics[currentTopicName];
+  if (currentQuestionIndex >= topicData.questions.length) {
+    showResults();
+    return;
+  }
+
+  const q = topicData.questions[currentQuestionIndex];
+  document.getElementById('contentArea').innerHTML = `
+    <div class="section-title">🧠 Quiz - ${currentTopicName}</div>
+    <p><strong>${q.q}</strong></p>
+    ${q.options.map(opt => `<button onclick="checkAnswer('${opt.replace(/'/g, "\\'")}')">${opt}</button><br>`).join('')}
+  `;
+}
+
+function checkAnswer(selectedOption) {
+  const topicData = currentTopicType === 'beginner' ? beginnerTopics[currentTopicName] : advancedTopics[currentTopicName];
+  const correctAnswer = topicData.questions[currentQuestionIndex].answer;
+
+  if (selectedOption === correctAnswer) {
+    currentScore++;
+    alert("✅ Correct!");
+  } else {
+    alert(`❌ Incorrect! Correct Answer: ${correctAnswer}`);
+  }
+
+  currentQuestionIndex++;
+  nextQuestion();
+}
+
+function showResults() {
+  let badge = "";
+  if (currentScore === 5) badge = "🏅 Gold Badge! Perfect!";
+  else if (currentScore === 4) badge = "🥈 Silver Badge! Great Job!";
+  else if (currentScore === 3) badge = "🥉 Bronze Badge! Good Effort!";
+  else badge = "📚 Keep practicing!";
+
+  document.getElementById('contentArea').innerHTML = `
+    <div class="section-title">🎉 Quiz Complete!</div>
+    <p>${badge}</p>
+    <canvas id="quizPie" width="300" height="300"></canvas><br>
+    <button onclick="showLearn()">Back to Topics</button>
+  `;
+
+  const ctx = document.getElementById('quizPie').getContext('2d');
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Correct', 'Incorrect'],
+      datasets: [{
+        data: [currentScore, 5 - currentScore],
+        backgroundColor: ['#4CAF50', '#FF6384']
+      }]
+    }
+  });
+}
+
+function simulateInvestment() {
+  const principal = parseFloat(document.getElementById('initialAmount').value);
+  const contribution = parseFloat(document.getElementById('annualContribution').value);
+  const years = parseInt(document.getElementById('years').value);
+  const rate = parseFloat(document.getElementById('rateOfReturn').value) / 100;
+
+  let data = [];
+  let labels = [];
+  let balance = principal;
+
+  for (let i = 0; i <= years; i++) {
+    if (i > 0) {
+      balance += contribution;
+      balance *= (1 + rate);
+    }
+    labels.push(`Year ${i}`);
+    data.push(balance.toFixed(2));
+  }
+
+  const ctx = document.getElementById('investmentChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Investment Value ($)',
+        data: data,
+        borderColor: '#4CAF50',
+        fill: false,
+        tension: 0.1
+      }]
+    }
+  });
+}
+</script>
+
+</body>
+</html>
+        
